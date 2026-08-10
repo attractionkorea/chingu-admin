@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>친구 관리자</title>
+<style>
+  :root{--pink:#D4537E;--ink:#2B2233;--sub:#8b8494;--line:#ece8f0;--bg:#faf8fb}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;background:var(--bg);color:var(--ink)}
+  header{background:#fff;border-bottom:1px solid var(--line);padding:14px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:5}
+  header b{font-size:16px}
+  header .who{margin-left:auto;font-size:12px;color:var(--sub)}
+  header button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer}
+  .wrap{max-width:900px;margin:0 auto;padding:16px}
+  .tabs{display:flex;gap:8px;margin:6px 0 16px;flex-wrap:wrap}
+  .tabs button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;color:var(--sub)}
+  .tabs button.on{background:var(--pink);color:#fff;border-color:var(--pink)}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}
+  .row{display:flex;gap:12px;align-items:center}
+  .ava{width:54px;height:54px;border-radius:12px;object-fit:cover;background:#f1eef4;flex:none}
+  .idimg{max-width:100%;border-radius:10px;border:1px solid var(--line);margin-top:10px;cursor:zoom-in}
+  .name{font-weight:700;font-size:15px}
+  .meta{font-size:12.5px;color:var(--sub);margin-top:2px}
+  .btns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .btn{border:none;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer}
+  .ok{background:var(--pink);color:#fff}.no{background:#fbeaf0;color:var(--pink)}
+  .grey{background:#f1eef4;color:var(--ink)}.danger{background:#e24b4a;color:#fff}
+  .pill{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;margin-left:6px}
+  .p-pending{background:#fff3d6;color:#946200}.p-verified{background:#e3f6ec;color:#1f8a55}
+  .p-rejected{background:#fdecec;color:#c0342f}.p-ban{background:#e24b4a;color:#fff}
+  input{border:1px solid var(--line);border-radius:10px;padding:11px 14px;font-size:14px;width:100%}
+  .login{max-width:340px;margin:12vh auto;background:#fff;border:1px solid var(--line);border-radius:18px;padding:28px}
+  .login h1{font-size:20px;margin:0 0 4px}.login p{color:var(--sub);font-size:13px;margin:0 0 18px}
+  .login input{margin-bottom:10px}.login .btn{width:100%}
+  .muted{color:var(--sub);font-size:13px;text-align:center;padding:30px}
+  .err{color:#c0342f;font-size:12.5px;margin-top:8px}
+  .stat{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+  .stat div{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 16px;min-width:100px}
+  .stat b{font-size:20px;display:block}.stat span{font-size:12px;color:var(--sub)}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SB_URL="https://jrgvhcgvlmyvelhwbwus.supabase.co";
+const SB_ANON="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpyZ3ZoY2d2bG15dmVsaHdid3VzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQwOTY4NjksImV4cCI6MjA5OTY3Mjg2OX0.C_5vxnadmvVt2FAYLl91E4YIcG4zAPmK-VJ6k_uJxaU";
+const sb=supabase.createClient(SB_URL,SB_ANON);
+const $=s=>document.querySelector(s);
+const el=(h)=>{const d=document.createElement('div');d.innerHTML=h;return d.firstElementChild};
+const esc=s=>(s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const yr=b=>b?(new Date().getFullYear()-b):'';
+const jobs={office:'회사원',public:'공무원',professional:'전문직',medical:'의료·간호',it:'IT·개발',finance:'금융',education:'교육·강사',sales:'영업·판매',service:'서비스업',food:'요식업',creative:'크리에이터',beauty:'뷰티·패션',self:'자영업',freelance:'프리랜서',student:'학생',etc:'기타'};
+const bodies={slim:'슬림',normal:'보통',muscular:'근육질·글래머',chubby:'통통'};
+const reasons={harassment:'괴롭힘',scam:'사기',dating_spam:'광고·스팸',underage:'미성년',fake_profile:'가짜프로필',other:'기타'};
+let ME=null, TAB='kyc';
+
+async function boot(){
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session){return renderLogin()}
+  const {data:isAdmin}=await sb.from('admins').select('uid').eq('uid',session.user.id).maybeSingle();
+  if(!isAdmin){await sb.auth.signOut();return renderLogin('관리자 권한이 없는 계정이에요.')}
+  ME=session.user; renderApp();
+}
+function renderLogin(msg){
+  $('#app').innerHTML=`<div class="login"><h1>친구 관리자</h1><p>운영자 이메일로 로그인 링크를 받습니다</p>
+    <input id="em" type="email" placeholder="운영자 이메일" autocomplete="username"/>
+    <button class="btn ok" onclick="doLogin()">로그인 링크 받기</button>
+    <div class="err" id="le">${msg?esc(msg):''}</div>
+    <div class="meta" id="lm" style="margin-top:10px"></div></div>`;
+}
+async function doLogin(){
+  const email=$('#em').value.trim();
+  $('#le').textContent='';$('#lm').textContent='';
+  if(!email)return $('#le').textContent='이메일을 입력하세요.';
+  const {error}=await sb.auth.signInWithOtp({email,options:{emailRedirectTo:location.href.split('#')[0],shouldCreateUser:false}});
+  if(error){$('#le').textContent='실패: '+error.message;return}
+  $('#lm').textContent='메일함을 확인하세요. 로그인 링크를 누르면 이 화면으로 돌아와 자동 로그인됩니다.';
+}
+async function logout(){await sb.auth.signOut();location.reload()}
+
+function renderApp(){
+  $('#app').innerHTML=`<header><b>친구 관리자</b>
+    <span class="who">${esc(ME.email||'')}</span><button onclick="logout()">로그아웃</button></header>
+    <div class="wrap">
+      <div class="tabs">
+        ${['kyc:KYC 심사','reports:신고','members:회원','admins:운영자'].map(t=>{const[k,l]=t.split(':');return `<button class="${TAB===k?'on':''}" onclick="go('${k}')">${l}</button>`}).join('')}
+      </div>
+      <div id="view" class="muted">불러오는 중…</div>
+    </div>`;
+  route();
+}
+function go(k){TAB=k;renderApp()}
+function route(){({kyc:loadKyc,reports:loadReports,members:loadMembers,admins:loadAdmins}[TAB])()}
+
+async function loadKyc(){
+  const {data,error}=await sb.from('profiles').select('id,nickname,country,gender,birth_year,region,purpose,job,height,body_type,photo_url').eq('kyc_status','pending').order('created_at',{ascending:false});
+  if(error)return $('#view').innerHTML=`<div class="err">${esc(error.message)}</div>`;
+  if(!data.length)return $('#view').innerHTML='<div class="muted">심사 대기 중인 회원이 없어요 🎉</div>';
+  $('#view').innerHTML='';
+  for(const p of data){
+    const c=el(`<div class="card">
+      <div class="row">
+        ${p.photo_url?`<img class="ava" src="${esc(p.photo_url)}"/>`:'<div class="ava"></div>'}
+        <div><div class="name">${esc(p.nickname)} <span class="pill p-pending">심사중</span></div>
+        <div class="meta">${p.country==='JP'?'🇯🇵 일본':'🇰🇷 한국'} · ${p.gender==='M'?'남':p.gender==='F'?'여':'-'} · ${yr(p.birth_year)}세 · ${esc(p.region||'-')}</div>
+        <div class="meta">${jobs[p.job]||'-'} · ${p.height?p.height+'cm':'-'} · ${bodies[p.body_type]||'-'}</div></div>
+      </div>
+      <div class="idbox"></div>
+      <div class="btns">
+        <button class="btn ok" onclick="setKyc('${p.id}','verified',this)">✅ 승인</button>
+        <button class="btn no" onclick="setKyc('${p.id}','rejected',this)">✕ 반려</button>
+      </div></div>`);
+    $('#view').appendChild(c);
+    // 신분증 이미지(있으면)
+    sb.storage.from('kyc-docs').createSignedUrl(p.id+'/id.jpg',3600).then(({data:d})=>{
+      if(d&&d.signedUrl){c.querySelector('.idbox').innerHTML=`<img class="idimg" src="${d.signedUrl}" onclick="window.open(this.src)"/>`;}
+      else{c.querySelector('.idbox').innerHTML='<div class="meta" style="margin-top:8px">※ 업로드된 신분증 이미지 없음</div>';}
+    });
+  }
+}
+async function setKyc(id,status,btn){
+  btn.disabled=true;
+  const {error}=await sb.from('profiles').update({kyc_status:status}).eq('id',id);
+  if(error){alert('실패: '+error.message);btn.disabled=false;return}
+  btn.closest('.card').remove();
+  if(!$('#view').children.length)$('#view').innerHTML='<div class="muted">심사 대기 중인 회원이 없어요 🎉</div>';
+}
+
+async function loadReports(){
+  const {data,error}=await sb.from('reports').select('*').order('created_at',{ascending:false}).limit(100);
+  if(error)return $('#view').innerHTML=`<div class="err">${esc(error.message)}</div>`;
+  if(!data.length)return $('#view').innerHTML='<div class="muted">신고가 없어요.</div>';
+  const ids=[...new Set(data.flatMap(r=>[r.target_id,r.reporter_id]))];
+  const {data:profs}=await sb.from('profiles').select('id,nickname,is_banned').in('id',ids);
+  const map=Object.fromEntries((profs||[]).map(p=>[p.id,p]));
+  $('#view').innerHTML='';
+  for(const r of data){
+    const t=map[r.target_id]||{},rep=map[r.reporter_id]||{};
+    const st=r.status==='open'?'접수':r.status==='reviewed'?'검토됨':'조치됨';
+    const c=el(`<div class="card">
+      <div class="name">${esc(t.nickname||r.target_id)} ${t.is_banned?'<span class="pill p-ban">정지됨</span>':''}
+        <span class="pill grey" style="background:#f1eef4;color:#666">${st}</span></div>
+      <div class="meta">사유: <b>${reasons[r.reason]||r.reason}</b> · 신고자: ${esc(rep.nickname||'-')} · ${new Date(r.created_at).toLocaleString('ko-KR')}</div>
+      ${r.detail?`<div class="meta" style="margin-top:6px">“${esc(r.detail)}”</div>`:''}
+      <div class="btns">
+        <button class="btn grey" onclick="rStat(${r.id},'reviewed',this)">검토완료</button>
+        <button class="btn grey" onclick="rStat(${r.id},'actioned',this)">조치완료</button>
+        <button class="btn danger" onclick="ban('${r.target_id}',true,this)">대상 정지</button>
+      </div></div>`);
+    $('#view').appendChild(c);
+  }
+}
+async function rStat(id,status,btn){btn.disabled=true;const {error}=await sb.from('reports').update({status}).eq('id',id);if(error)alert('실패: '+error.message);loadReports();}
+async function ban(uid,val,btn){if(!confirm(val?'이 회원을 정지할까요?':'정지를 해제할까요?'))return;btn&&(btn.disabled=true);const {error}=await sb.from('profiles').update({is_banned:val}).eq('id',uid);if(error){alert('실패: '+error.message);return}route();}
+
+async function loadMembers(){
+  $('#view').innerHTML=`<div class="card"><input id="q" placeholder="닉네임으로 검색 후 Enter" onkeydown="if(event.key==='Enter')searchM()"/></div><div id="mlist" class="muted">닉네임을 검색하세요.</div>`;
+}
+async function searchM(){
+  const q=$('#q').value.trim();
+  const qb=sb.from('profiles').select('id,nickname,country,gender,birth_year,kyc_status,is_banned,is_premium,is_paid_member').order('created_at',{ascending:false}).limit(50);
+  const {data,error}=q?await qb.ilike('nickname','%'+q+'%'):await qb;
+  if(error)return $('#mlist').innerHTML=`<div class="err">${esc(error.message)}</div>`;
+  if(!data.length)return $('#mlist').innerHTML='<div class="muted">결과 없음</div>';
+  $('#mlist').innerHTML=data.map(p=>{
+    const kp=p.kyc_status==='verified'?'p-verified':p.kyc_status==='rejected'?'p-rejected':'p-pending';
+    const tier=p.is_premium?'프리미엄':p.is_paid_member?'플러스':'무료';
+    return `<div class="card"><div class="name">${esc(p.nickname)}
+      <span class="pill ${kp}">${p.kyc_status}</span>${p.is_banned?'<span class="pill p-ban">정지</span>':''}</div>
+      <div class="meta">${p.country==='JP'?'🇯🇵':'🇰🇷'} · ${p.gender||'-'} · ${yr(p.birth_year)}세 · ${tier}</div>
+      <div class="btns">${p.is_banned
+        ?`<button class="btn grey" onclick="ban('${p.id}',false,this)">정지 해제</button>`
+        :`<button class="btn danger" onclick="ban('${p.id}',true,this)">정지</button>`}</div></div>`;
+  }).join('');
+}
+
+async function loadAdmins(){
+  const {data,error}=await sb.from('admins').select('uid,added_at').order('added_at');
+  if(error)return $('#view').innerHTML=`<div class="err">${esc(error.message)}</div>`;
+  const ids=data.map(a=>a.uid);
+  const {data:profs}=await sb.from('profiles').select('id,nickname').in('id',ids);
+  const map=Object.fromEntries((profs||[]).map(p=>[p.id,p.nickname]));
+  $('#view').innerHTML=`<div class="card"><input id="ae" type="email" placeholder="이메일로 운영자 추가 후 Enter" onkeydown="if(event.key==='Enter')addAdmin()"/><div class="err" id="aerr"></div></div>`
+    +data.map(a=>`<div class="card"><div class="row"><div><div class="name">${esc(map[a.uid]||'(프로필 없음)')}</div>
+      <div class="meta">${a.uid}</div></div>
+      <button class="btn no" style="margin-left:auto" onclick="rmAdmin('${a.uid}',this)">해제</button></div></div>`).join('');
+}
+async function addAdmin(){
+  const email=$('#ae').value.trim();$('#aerr').textContent='';
+  const {data,error}=await sb.rpc('add_admin_by_email',{p_email:email});
+  if(error)return $('#aerr').textContent='실패: '+error.message;
+  loadAdmins();
+}
+async function rmAdmin(uid,btn){if(uid===ME.id){alert('본인은 해제할 수 없어요.');return}if(!confirm('운영자에서 해제할까요?'))return;const {error}=await sb.from('admins').delete().eq('uid',uid);if(error){alert('실패: '+error.message);return}loadAdmins();}
+
+boot();
+</script>
+</body>
+</html>
