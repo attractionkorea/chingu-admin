@@ -5,219 +5,317 @@
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>친구 관리자</title>
 <style>
-  :root{--pink:#D4537E;--ink:#2B2233;--sub:#8b8494;--line:#ece8f0;--bg:#faf8fb}
+  :root{--org:#FF5A22;--org2:#FF7C46;--ink:#241f2b;--sub:#8b8494;--line:#eceaf0;--bg:#f7f6f9;--card:#fff}
   *{box-sizing:border-box}
-  body{margin:0;font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;background:var(--bg);color:var(--ink)}
-  header{background:#fff;border-bottom:1px solid var(--line);padding:14px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:5}
-  header b{font-size:16px}
+  body{margin:0;font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+  a{color:var(--org)}
+  header{background:#fff;border-bottom:1px solid var(--line);padding:12px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:20}
+  header .logo{font-weight:800;font-size:17px}.header .logo b{color:var(--org)}
   header .who{margin-left:auto;font-size:12px;color:var(--sub)}
   header button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer}
-  .wrap{max-width:900px;margin:0 auto;padding:16px}
-  .tabs{display:flex;gap:8px;margin:6px 0 16px;flex-wrap:wrap}
-  .tabs button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;color:var(--sub)}
-  .tabs button.on{background:var(--pink);color:#fff;border-color:var(--pink)}
-  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}
+  .wrap{max-width:1040px;margin:0 auto;padding:16px}
+  .tabs{display:flex;gap:6px;margin:4px 0 16px;flex-wrap:wrap}
+  .tabs button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;color:var(--sub)}
+  .tabs button.on{background:var(--org);color:#fff;border-color:var(--org)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}
   .row{display:flex;gap:12px;align-items:center}
-  .ava{width:54px;height:54px;border-radius:12px;object-fit:cover;background:#f1eef4;flex:none}
-  .idimg{max-width:100%;border-radius:10px;border:1px solid var(--line);margin-top:10px;cursor:zoom-in}
+  .ava{width:52px;height:52px;border-radius:12px;object-fit:cover;background:#f1eef4;flex:none}
+  .idimg{max-width:220px;border-radius:10px;border:1px solid var(--line);margin-top:10px;cursor:zoom-in}
   .name{font-weight:700;font-size:15px}
   .meta{font-size:12.5px;color:var(--sub);margin-top:2px}
   .btns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
-  .btn{border:none;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer}
-  .ok{background:var(--pink);color:#fff}.no{background:#fbeaf0;color:var(--pink)}
-  .grey{background:#f1eef4;color:var(--ink)}.danger{background:#e24b4a;color:#fff}
+  .btn{border:none;border-radius:10px;padding:9px 15px;font-size:13px;font-weight:700;cursor:pointer}
+  .ok{background:var(--org);color:#fff}.no{background:#ffe9e0;color:var(--org)}
+  .grey{background:#f1eef4;color:var(--ink)}.danger{background:#e24b4a;color:#fff}.ghost{background:#fff;border:1px solid var(--line);color:var(--ink)}
   .pill{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;margin-left:6px}
   .p-pending{background:#fff3d6;color:#946200}.p-verified{background:#e3f6ec;color:#1f8a55}
-  .p-rejected{background:#fdecec;color:#c0342f}.p-ban{background:#e24b4a;color:#fff}
-  input{border:1px solid var(--line);border-radius:10px;padding:11px 14px;font-size:14px;width:100%}
-  .login{max-width:340px;margin:12vh auto;background:#fff;border:1px solid var(--line);border-radius:18px;padding:28px}
+  .p-rejected{background:#fdecec;color:#c0342f}.p-ban{background:#e24b4a;color:#fff}.p-del{background:#e9e6ee;color:#666}
+  .p-paid{background:#e7efff;color:#2560c9}.p-prem{background:#f3e9ff;color:#7a34c9}
+  input,select{border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14px;width:100%;background:#fff}
+  .login{max-width:350px;margin:11vh auto;background:#fff;border:1px solid var(--line);border-radius:18px;padding:28px}
   .login h1{font-size:20px;margin:0 0 4px}.login p{color:var(--sub);font-size:13px;margin:0 0 18px}
   .login input{margin-bottom:10px}.login .btn{width:100%}
   .muted{color:var(--sub);font-size:13px;text-align:center;padding:30px}
   .err{color:#c0342f;font-size:12.5px;margin-top:8px}
-  .stat{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
-  .stat div{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 16px;min-width:100px}
-  .stat b{font-size:20px;display:block}.stat span{font-size:12px;color:var(--sub)}
+  .stat{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:14px}
+  .stat div{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+  .stat b{font-size:22px;display:block}.stat span{font-size:12px;color:var(--sub)}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line)}
+  th{color:var(--sub);font-weight:600;font-size:12px}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  .net{color:#1f8a55;font-weight:800}
+  .modal{position:fixed;inset:0;background:rgba(20,16,26,.45);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+  .sheet{background:#fff;border-radius:16px;max-width:560px;width:100%;max-height:86vh;overflow:auto;padding:18px}
+  .sheet h3{margin:0 0 10px}
+  .bubble{max-width:78%;padding:9px 12px;border-radius:14px;margin:6px 0;font-size:13px;line-height:1.4;word-break:break-word}
+  .bl{background:#f1eef4;border-top-left-radius:4px;margin-right:auto}
+  .br{background:var(--org);color:#fff;border-top-right-radius:4px;margin-left:auto}
+  .bubble .tr{font-size:11px;opacity:.75;margin-top:3px}
+  .bubble img{max-width:180px;border-radius:8px;display:block}
+  .chip{display:inline-block;background:#f1eef4;border-radius:999px;padding:3px 10px;font-size:11.5px;margin:2px 4px 2px 0}
+  .flex{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .grow{flex:1;min-width:120px}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;z-index:99;opacity:0;transition:opacity .2s}
+  .toast.on{opacity:1}
 </style>
 </head>
 <body>
 <div id="app"></div>
+<div class="toast" id="toast"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SB_URL="https://jrgvhcgvlmyvelhwbwus.supabase.co";
 const SB_ANON="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpyZ3ZoY2d2bG15dmVsaHdid3VzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQwOTY4NjksImV4cCI6MjA5OTY3Mjg2OX0.C_5vxnadmvVt2FAYLl91E4YIcG4zAPmK-VJ6k_uJxaU";
 const sb=supabase.createClient(SB_URL,SB_ANON);
 const $=s=>document.querySelector(s);
-const el=(h)=>{const d=document.createElement('div');d.innerHTML=h;return d.firstElementChild};
+const el=h=>{const d=document.createElement('div');d.innerHTML=h;return d.firstElementChild};
 const esc=s=>(s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const yr=b=>b?(new Date().getFullYear()-b):'';
-const jobs={office:'회사원',public:'공무원',professional:'전문직',medical:'의료·간호',it:'IT·개발',finance:'금융',education:'교육·강사',sales:'영업·판매',service:'서비스업',food:'요식업',creative:'크리에이터',beauty:'뷰티·패션',self:'자영업',freelance:'프리랜서',student:'학생',etc:'기타'};
-const bodies={slim:'슬림',normal:'보통',muscular:'근육질·글래머',chubby:'통통'};
+const age=b=>b?(new Date().getFullYear()-b):'';
+const nf=n=>Number(n||0).toLocaleString('ko-KR');
+const cur=(v,c)=>({JPY:'¥',KRW:'₩',USD:'$'}[c]||'')+nf(Math.round(v))+(({JPY:'¥',KRW:'₩',USD:'$'}[c])?'':' '+(c||''));
+const dt=s=>s?new Date(s).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
+const jobs={office:'회사원',public:'공무원',professional:'전문직',medical:'의료·간호',it:'IT·개발',finance:'금융',education:'교육',sales:'영업',service:'서비스',food:'요식업',creative:'크리에이터',beauty:'뷰티',self:'자영업',freelance:'프리랜서',student:'학생',etc:'기타'};
 const reasons={harassment:'괴롭힘',scam:'사기',dating_spam:'광고·스팸',underage:'미성년',fake_profile:'가짜프로필',other:'기타'};
-let ME=null, TAB='kyc';
+const flag=c=>c==='JP'?'🇯🇵':c==='KR'?'🇰🇷':'🏳️';
+let ME=null,TAB='dash';
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),1800)}
 
+// ── admin-api 호출 ──
+async function api(action,params={}){
+  const {data,error}=await sb.functions.invoke('admin-api',{body:{action,...params}});
+  if(error){let msg=error.message||'요청 실패';try{const j=await error.context.json();if(j&&j.error)msg=j.error;}catch(_){ }throw new Error(msg)}
+  if(data&&data.error)throw new Error(data.error);
+  return data;
+}
+
+// ── 로그인 ──
 async function boot(){
   const {data:{session}}=await sb.auth.getSession();
-  if(!session){return renderLogin()}
+  if(!session)return renderLogin();
   const {data:isAdmin}=await sb.from('admins').select('uid').eq('uid',session.user.id).maybeSingle();
   if(!isAdmin){await sb.auth.signOut();return renderLogin('관리자 권한이 없는 계정이에요.')}
-  ME=session.user; renderApp();
+  ME=session.user;renderApp();
 }
 function renderLogin(msg){
-  $('#app').innerHTML=`<div class="login"><h1>친구 관리자</h1><p>운영자 로그인</p>
+  $('#app').innerHTML=`<div class="login"><h1>친구 <b style="color:var(--org)">관리자</b></h1><p>운영자 로그인</p>
     <input id="em" type="email" placeholder="이메일" autocomplete="username"/>
     <input id="pw" type="password" placeholder="비밀번호" autocomplete="current-password" onkeydown="if(event.key==='Enter')pwLogin()"/>
     <button class="btn ok" onclick="pwLogin()">로그인</button>
-    <div class="err" id="le">${msg?esc(msg):''}</div>
-    <div class="meta" id="lm" style="margin-top:10px"></div>
-    <div style="text-align:center;margin-top:14px"><a href="#" onclick="doLogin();return false" style="font-size:12px;color:var(--sub)">비밀번호가 아직 없다면 · 이메일 로그인 링크 받기</a></div>
-    </div>`;
+    <div class="err" id="le">${msg?esc(msg):''}</div><div class="meta" id="lm" style="margin-top:10px"></div>
+    <div style="text-align:center;margin-top:14px"><a href="#" onclick="doLogin();return false" style="font-size:12px">비밀번호가 없다면 · 이메일 로그인 링크 받기</a></div></div>`;
 }
-async function pwLogin(){
-  const email=$('#em').value.trim(),password=$('#pw').value;
-  $('#le').textContent='';$('#lm').innerHTML='';
-  if(!email||!password)return $('#le').textContent='이메일과 비밀번호를 입력하세요.';
-  const {error}=await sb.auth.signInWithPassword({email,password});
-  if(error)return $('#le').textContent='로그인 실패: '+error.message;
-  boot();
-}
-async function setPw(){
-  const p=prompt('새 비밀번호를 입력하세요 (6자 이상). 다음부터 이메일+비밀번호로 로그인할 수 있어요.');
-  if(!p)return; if(p.length<6)return alert('6자 이상이어야 해요.');
-  const {error}=await sb.auth.updateUser({password:p});
-  alert(error?('실패: '+error.message):'✅ 비밀번호가 설정됐어요. 다음 로그인부터 사용하세요.');
-}
-async function doLogin(){
-  const email=$('#em').value.trim();
-  $('#le').textContent='';$('#lm').innerHTML='';
-  if(!email)return $('#le').textContent='이메일을 입력하세요.';
-  const btn=document.querySelector('.login .btn');
-  btn.disabled=true;const orig=btn.textContent;btn.textContent='전송 중…';
-  const {error}=await sb.auth.signInWithOtp({email,options:{emailRedirectTo:location.href.split('#')[0],shouldCreateUser:false}});
-  btn.disabled=false;btn.textContent=orig;
-  if(error){
-    const m=/after (\d+) seconds/.exec(error.message||'');
-    $('#le').textContent=m?`방금 링크를 보냈어요. ${m[1]}초 뒤에 다시 요청할 수 있어요 (그 사이 메일함을 확인하세요).`:('실패: '+(error.message||''));
-    return;
-  }
-  $('#lm').innerHTML='<div style="background:#e3f6ec;color:#1f8a55;border-radius:10px;padding:14px;font-weight:700">✅ 로그인 링크를 이메일로 보냈어요!<br><span style="font-weight:400;font-size:12.5px">메일함(스팸함 포함)에서 링크를 누르면 이 화면으로 돌아와 자동 로그인됩니다.</span></div>';
-}
+async function pwLogin(){const email=$('#em').value.trim(),password=$('#pw').value;$('#le').textContent='';if(!email||!password)return $('#le').textContent='이메일과 비밀번호를 입력하세요.';const {error}=await sb.auth.signInWithPassword({email,password});if(error)return $('#le').textContent='로그인 실패: '+error.message;boot();}
+async function setPw(){const p=prompt('새 비밀번호 (6자 이상)');if(!p)return;if(p.length<6)return alert('6자 이상');const {error}=await sb.auth.updateUser({password:p});alert(error?('실패: '+error.message):'✅ 비밀번호가 설정됐어요.');}
+async function doLogin(){const email=$('#em').value.trim();$('#le').textContent='';if(!email)return $('#le').textContent='이메일을 입력하세요.';const {error}=await sb.auth.signInWithOtp({email,options:{emailRedirectTo:location.href.split('#')[0],shouldCreateUser:false}});if(error)return $('#le').textContent='실패: '+error.message;$('#lm').innerHTML='<div style="background:#e3f6ec;color:#1f8a55;border-radius:10px;padding:14px;font-weight:700">✅ 로그인 링크를 이메일로 보냈어요!</div>';}
 async function logout(){await sb.auth.signOut();location.reload()}
 
+const TABS=[['dash','📊 대시보드'],['rev','💰 매출'],['kyc','✅ KYC'],['reports','🚩 신고'],['mod','💬 채팅·이미지'],['members','👥 회원'],['dates','🗓️ 데이트'],['admins','🛡️ 운영자']];
 function renderApp(){
-  $('#app').innerHTML=`<header><b>친구 관리자</b>
-    <span class="who">${esc(ME.email||'')}</span><button onclick="setPw()">비밀번호 설정</button><button onclick="logout()">로그아웃</button></header>
-    <div class="wrap">
-      <div class="tabs">
-        ${['kyc:KYC 심사','reports:신고','members:회원','admins:운영자'].map(t=>{const[k,l]=t.split(':');return `<button class="${TAB===k?'on':''}" onclick="go('${k}')">${l}</button>`}).join('')}
-      </div>
-      <div id="view" class="muted">불러오는 중…</div>
-    </div>`;
+  $('#app').innerHTML=`<header><span class="logo">친구 <b style="color:var(--org)">관리자</b></span>
+    <span class="who">${esc(ME.email||'')}</span><button onclick="setPw()">비밀번호</button><button onclick="logout()">로그아웃</button></header>
+    <div class="wrap"><div class="tabs">${TABS.map(([k,l])=>`<button class="${TAB===k?'on':''}" onclick="go('${k}')">${l}</button>`).join('')}</div>
+    <div id="view" class="muted">불러오는 중…</div></div>`;
   route();
 }
 function go(k){TAB=k;renderApp()}
-function route(){({kyc:loadKyc,reports:loadReports,members:loadMembers,admins:loadAdmins}[TAB])()}
+function route(){({dash:loadDash,rev:loadRev,kyc:loadKyc,reports:loadReports,mod:loadMod,members:loadMembers,dates:loadDates,admins:loadAdmins}[TAB])().catch(e=>$('#view').innerHTML=`<div class="err">${esc(e.message)}</div>`)}
 
+// ── 대시보드 ──
+async function loadDash(){
+  const d=await api('overview');
+  const s=(b,l)=>`<div><b>${nf(b)}</b><span>${l}</span></div>`;
+  $('#view').innerHTML=`
+    <div class="stat">${s(d.users.total,'전체 회원')}${s(d.users.jp,'🇯🇵 일본')}${s(d.users.kr,'🇰🇷 한국')}${s(d.users.male,'남')}${s(d.users.female,'여')}${s(d.growth.new1,'오늘 가입')}${s(d.growth.new7,'7일 가입')}</div>
+    <div class="stat">${s(d.kyc.pending,'KYC 대기')}${s(d.kyc.verified,'KYC 승인')}${s(d.tiers.paid,'플러스+')}${s(d.tiers.premium,'프리미엄')}${s(d.users.banned,'정지')}${s(d.users.deleted,'탈퇴')}</div>
+    <div class="stat">${s(d.activity.matches,'총 매칭')}${s(d.activity.msgs7,'7일 메시지')}${s(d.activity.reportsOpen,'미처리 신고')}${s(d.activity.imgPending,'이미지 대기')}</div>
+    <div class="card"><div class="meta">빠른 이동</div><div class="btns">
+      <button class="btn ghost" onclick="go('kyc')">KYC 심사 ${d.kyc.pending}건</button>
+      <button class="btn ghost" onclick="go('reports')">신고 ${d.activity.reportsOpen}건</button>
+      <button class="btn ghost" onclick="go('mod')">이미지 ${d.activity.imgPending}건</button>
+      <button class="btn ghost" onclick="go('rev')">매출 보기</button></div></div>`;
+}
+
+// ── 매출 ──
+function feeRates(){try{return JSON.parse(localStorage.getItem('feeRates'))||{apple:15,google:15}}catch(_){return{apple:15,google:15}}}
+function setFee(store,v){const f=feeRates();f[store]=Math.max(0,Math.min(100,Number(v)||0));localStorage.setItem('feeRates',JSON.stringify(f));loadRev()}
+async function loadRev(){
+  const days=window._revDays||90;
+  const d=await api('revenue',{days});
+  const f=feeRates();
+  const stores=[['apple','🍎 Apple'],['google','▶️ Google']];
+  let rows='';let totNet={};
+  for(const[sk,sl]of stores){
+    const byc=d.byStoreCur[sk]||{};
+    for(const c of Object.keys(byc)){
+      const g=byc[c].gross,fee=g*(f[sk]||0)/100,net=g-fee;
+      totNet[c]=(totNet[c]||0)+net;
+      rows+=`<tr><td>${sl}</td><td>${c}</td><td class="num">${cur(g,c)}</td><td class="num" style="color:#c0342f">−${cur(fee,c)}</td><td class="num net">${cur(net,c)}</td><td class="num">${byc[c].count}</td></tr>`;
+    }
+  }
+  if(!rows)rows=`<tr><td colspan="6" class="muted">아직 기록된 실매출이 없어요. (RevenueCat 결제가 발생하면 스토어·통화별로 쌓입니다)</td></tr>`;
+  const est=d.estimate;
+  $('#view').innerHTML=`
+    <div class="card"><div class="flex"><b style="font-size:15px">수수료율(%)</b>
+      <span class="meta">🍎 Apple</span><input style="width:70px" type="number" value="${f.apple}" onchange="setFee('apple',this.value)"/>
+      <span class="meta">▶️ Google</span><input style="width:70px" type="number" value="${f.google}" onchange="setFee('google',this.value)"/>
+      <span class="grow"></span>
+      <select style="width:auto" onchange="window._revDays=Number(this.value);loadRev()">
+        ${[[30,'최근 30일'],[90,'최근 90일'],[180,'최근 180일'],[365,'최근 1년']].map(([v,l])=>`<option value="${v}" ${days==v?'selected':''}>${l}</option>`).join('')}
+      </select></div>
+      <div class="meta" style="margin-top:8px">순이익 = 총매출 − (총매출 × 수수료율). 통화별 표시(환산 없음). 스토어 표시가 기준 추정치.</div></div>
+    <div class="card"><b style="font-size:15px">실매출 (RevenueCat 기록 · 최근 ${days}일)</b>
+      <table style="margin-top:10px"><thead><tr><th>스토어</th><th>통화</th><th class="num">총매출</th><th class="num">수수료</th><th class="num">순이익</th><th class="num">건수</th></tr></thead>
+      <tbody>${rows}</tbody></table>
+      ${Object.keys(totNet).length?`<div class="meta" style="margin-top:10px">순이익 합계 — ${Object.entries(totNet).map(([c,v])=>`<b class="net">${cur(v,c)}</b>`).join(' · ')}</div>`:''}
+      <div class="meta" style="margin-top:6px">종류별 총매출: ${Object.entries(d.byKind).map(([k,v])=>`${k==='subscription'?'구독':k==='point_pack'?'포인트팩':k} ${nf(v)}`).join(' · ')||'-'}</div></div>
+    <div class="card"><b style="font-size:15px">MRR 추정 (현재 활성 구독자 × 단가)</b>
+      <div class="stat" style="margin-top:10px">
+        <div><b>${cur(est.JPY,'JPY')}</b><span>🇯🇵 월매출 추정</span></div>
+        <div><b>${cur(est.KRW,'KRW')}</b><span>🇰🇷 월매출 추정</span></div>
+        <div><b>${nf(est.counts.paidJp+est.counts.paidKr)}</b><span>플러스 구독</span></div>
+        <div><b>${nf(est.counts.premiumJp+est.counts.premiumKr)}</b><span>프리미엄 구독</span></div></div>
+      <div class="meta">플러스 ¥3,000/₩30,000 · 프리미엄 ¥4,850/₩50,000. 스토어 구분 없는 추정(과거분 참고용).</div></div>`;
+}
+
+// ── KYC ──
 async function loadKyc(){
-  const {data,error}=await sb.from('profiles').select('id,nickname,country,gender,birth_year,region,purpose,job,height,body_type,photo_url').eq('kyc_status','pending').order('created_at',{ascending:false});
-  if(error)return $('#view').innerHTML=`<div class="err">${esc(error.message)}</div>`;
-  if(!data.length)return $('#view').innerHTML='<div class="muted">심사 대기 중인 회원이 없어요 🎉</div>';
-  $('#view').innerHTML='';
-  for(const p of data){
-    const c=el(`<div class="card">
-      <div class="row">
-        ${p.photo_url?`<img class="ava" src="${esc(p.photo_url)}"/>`:'<div class="ava"></div>'}
-        <div><div class="name">${esc(p.nickname)} <span class="pill p-pending">심사중</span></div>
-        <div class="meta">${p.country==='JP'?'🇯🇵 일본':'🇰🇷 한국'} · ${p.gender==='M'?'남':p.gender==='F'?'여':'-'} · ${yr(p.birth_year)}세 · ${esc(p.region||'-')}</div>
-        <div class="meta">${jobs[p.job]||'-'} · ${p.height?p.height+'cm':'-'} · ${bodies[p.body_type]||'-'}</div></div>
-      </div>
-      <div class="idbox"></div>
-      <div class="btns">
-        <button class="btn ok" onclick="setKyc('${p.id}','verified',this)">✅ 승인</button>
-        <button class="btn no" onclick="setKyc('${p.id}','rejected',this)">✕ 반려</button>
-      </div></div>`);
-    $('#view').appendChild(c);
-    // 신분증 이미지(있으면)
-    sb.storage.from('kyc-docs').createSignedUrl(p.id+'/id.jpg',3600).then(({data:d})=>{
-      if(d&&d.signedUrl){c.querySelector('.idbox').innerHTML=`<img class="idimg" src="${d.signedUrl}" onclick="window.open(this.src)"/>`;}
-      else{c.querySelector('.idbox').innerHTML='<div class="meta" style="margin-top:8px">※ 업로드된 신분증 이미지 없음</div>';}
-    });
-  }
+  const {items}=await api('kyc_list');
+  if(!items.length)return $('#view').innerHTML='<div class="muted">심사 대기 중인 회원이 없어요 🎉</div>';
+  $('#view').innerHTML=items.map(p=>`<div class="card" id="kyc_${p.id}">
+    <div class="row">${p.photo_url?`<img class="ava" src="${esc(p.photo_url)}"/>`:'<div class="ava"></div>'}
+      <div><div class="name">${esc(p.nickname)} <span class="pill p-pending">심사중</span></div>
+      <div class="meta">${flag(p.country)} · ${p.gender==='M'?'남':p.gender==='F'?'여':'-'} · ${age(p.birth_year)}세 · ${esc(p.region||'-')}</div>
+      <div class="meta">${jobs[p.job]||'-'} · ${p.height?p.height+'cm':'-'} ${p.mbti?'· '+esc(p.mbti):''}</div></div></div>
+    ${p.bio_original?`<div class="meta" style="margin-top:8px">“${esc(p.bio_original)}”</div>`:''}
+    ${p.id_doc_url?`<img class="idimg" src="${esc(p.id_doc_url)}" onclick="window.open(this.src)"/>`:'<div class="meta" style="margin-top:8px">※ 업로드된 신분증 없음</div>'}
+    <div class="btns"><button class="btn ok" onclick="kycDo('${p.id}','verified')">✅ 승인</button>
+      <button class="btn no" onclick="kycDo('${p.id}','rejected')">✕ 반려</button>
+      <button class="btn ghost" onclick="openMember('${p.id}')">상세</button></div></div>`).join('');
 }
-async function setKyc(id,status,btn){
-  btn.disabled=true;
-  const {error}=await sb.from('profiles').update({kyc_status:status}).eq('id',id);
-  if(error){alert('실패: '+error.message);btn.disabled=false;return}
-  btn.closest('.card').remove();
-  if(!$('#view').children.length)$('#view').innerHTML='<div class="muted">심사 대기 중인 회원이 없어요 🎉</div>';
-}
+async function kycDo(id,status){try{await api('kyc_decide',{id,status});$('#kyc_'+id)?.remove();toast(status==='verified'?'승인됨':'반려됨');if(!$('#view').children.length)$('#view').innerHTML='<div class="muted">대기 없음 🎉</div>';}catch(e){alert(e.message)}}
 
+// ── 신고 ──
 async function loadReports(){
-  const {data,error}=await sb.from('reports').select('*').order('created_at',{ascending:false}).limit(100);
-  if(error)return $('#view').innerHTML=`<div class="err">${esc(error.message)}</div>`;
-  if(!data.length)return $('#view').innerHTML='<div class="muted">신고가 없어요.</div>';
-  const ids=[...new Set(data.flatMap(r=>[r.target_id,r.reporter_id]))];
-  const {data:profs}=await sb.from('profiles').select('id,nickname,is_banned').in('id',ids);
-  const map=Object.fromEntries((profs||[]).map(p=>[p.id,p]));
-  $('#view').innerHTML='';
-  for(const r of data){
-    const t=map[r.target_id]||{},rep=map[r.reporter_id]||{};
+  const {items}=await api('reports_list');
+  if(!items.length)return $('#view').innerHTML='<div class="muted">신고가 없어요.</div>';
+  $('#view').innerHTML=items.map(r=>{
     const st=r.status==='open'?'접수':r.status==='reviewed'?'검토됨':'조치됨';
-    const c=el(`<div class="card">
-      <div class="name">${esc(t.nickname||r.target_id)} ${t.is_banned?'<span class="pill p-ban">정지됨</span>':''}
-        <span class="pill grey" style="background:#f1eef4;color:#666">${st}</span></div>
-      <div class="meta">사유: <b>${reasons[r.reason]||r.reason}</b> · 신고자: ${esc(rep.nickname||'-')} · ${new Date(r.created_at).toLocaleString('ko-KR')}</div>
+    return `<div class="card"><div class="name">${esc(r.target?.nickname||r.target_id)} ${r.target?.is_banned?'<span class="pill p-ban">정지</span>':''}<span class="pill grey">${st}</span></div>
+      <div class="meta">사유 <b>${reasons[r.reason]||r.reason}</b> · 신고자 ${esc(r.reporter?.nickname||'-')} · ${dt(r.created_at)}</div>
       ${r.detail?`<div class="meta" style="margin-top:6px">“${esc(r.detail)}”</div>`:''}
-      <div class="btns">
-        <button class="btn grey" onclick="rStat(${r.id},'reviewed',this)">검토완료</button>
-        <button class="btn grey" onclick="rStat(${r.id},'actioned',this)">조치완료</button>
-        <button class="btn danger" onclick="ban('${r.target_id}',true,this)">대상 정지</button>
-      </div></div>`);
-    $('#view').appendChild(c);
-  }
-}
-async function rStat(id,status,btn){btn.disabled=true;const {error}=await sb.from('reports').update({status}).eq('id',id);if(error)alert('실패: '+error.message);loadReports();}
-async function ban(uid,val,btn){if(!confirm(val?'이 회원을 정지할까요?':'정지를 해제할까요?'))return;btn&&(btn.disabled=true);const {error}=await sb.from('profiles').update({is_banned:val}).eq('id',uid);if(error){alert('실패: '+error.message);return}route();}
-
-async function loadMembers(){
-  $('#view').innerHTML=`<div class="card"><input id="q" placeholder="닉네임으로 검색 후 Enter" onkeydown="if(event.key==='Enter')searchM()"/></div><div id="mlist" class="muted">닉네임을 검색하세요.</div>`;
-}
-async function searchM(){
-  const q=$('#q').value.trim();
-  const qb=sb.from('profiles').select('id,nickname,country,gender,birth_year,kyc_status,is_banned,is_premium,is_paid_member').order('created_at',{ascending:false}).limit(50);
-  const {data,error}=q?await qb.ilike('nickname','%'+q+'%'):await qb;
-  if(error)return $('#mlist').innerHTML=`<div class="err">${esc(error.message)}</div>`;
-  if(!data.length)return $('#mlist').innerHTML='<div class="muted">결과 없음</div>';
-  $('#mlist').innerHTML=data.map(p=>{
-    const kp=p.kyc_status==='verified'?'p-verified':p.kyc_status==='rejected'?'p-rejected':'p-pending';
-    const tier=p.is_premium?'프리미엄':p.is_paid_member?'플러스':'무료';
-    return `<div class="card"><div class="name">${esc(p.nickname)}
-      <span class="pill ${kp}">${p.kyc_status}</span>${p.is_banned?'<span class="pill p-ban">정지</span>':''}</div>
-      <div class="meta">${p.country==='JP'?'🇯🇵':'🇰🇷'} · ${p.gender||'-'} · ${yr(p.birth_year)}세 · ${tier}</div>
-      <div class="btns">${p.is_banned
-        ?`<button class="btn grey" onclick="ban('${p.id}',false,this)">정지 해제</button>`
-        :`<button class="btn danger" onclick="ban('${p.id}',true,this)">정지</button>`}</div></div>`;
+      <div class="btns"><button class="btn ok" onclick="viewReportChat(${r.id})">💬 신고된 채팅 보기</button>
+        <button class="btn ghost" onclick="openMember('${r.target_id}')">대상 상세</button>
+        <button class="btn grey" onclick="repStat(${r.id},'reviewed')">검토완료</button>
+        <button class="btn grey" onclick="repStat(${r.id},'actioned')">조치완료</button>
+        <button class="btn danger" onclick="banUser('${r.target_id}',true)">대상 정지</button></div></div>`;
   }).join('');
 }
+async function repStat(id,status){try{await api('report_set_status',{id,status});toast('처리됨');loadReports();}catch(e){alert(e.message)}}
+async function viewReportChat(rid){
+  try{const d=await api('report_chat',{report_id:rid});
+    const parts=`${esc(d.reporter?.nickname||'신고자')} ↔ ${esc(d.target?.nickname||'대상')}`;
+    const body=d.messages.length?d.messages.map(m=>{
+      const mine=m.sender_id===d.target?.id; // 대상(피신고자)을 오른쪽으로
+      return `<div class="bubble ${mine?'br':'bl'}">${m.image_url?`<img src="${esc(m.image_url)}"/>`:''}${esc(m.original_text||'')}${m.translated_text&&m.translated_text!==m.original_text?`<div class="tr">${esc(m.translated_text)}</div>`:''}<div class="tr">${dt(m.created_at)}${m.image_state?' · 사진:'+m.image_state:''}</div></div>`;
+    }).join(''):'<div class="muted">두 사람 사이의 대화 기록이 없어요.</div>';
+    modal(`<h3>신고된 채팅 — ${parts}</h3><div class="meta" style="margin-bottom:8px">오른쪽=피신고자(${esc(d.target?.nickname||'')})</div>${body}
+      <div class="btns"><button class="btn danger" onclick="banUser('${d.target?.id}',true);closeModal()">피신고자 정지</button><button class="btn ghost" onclick="closeModal()">닫기</button></div>`);
+  }catch(e){alert(e.message)}
+}
 
+// ── 채팅·이미지 모더레이션 ──
+async function loadMod(){
+  const st=window._imgState||'pending';
+  const {items}=await api('images_pending',{state:st});
+  const tabs=[['pending','대기'],['rejected','거부됨'],['approved','승인됨'],['all','전체']];
+  const head=`<div class="card"><div class="flex"><b>이미지 모더레이션</b><span class="grow"></span>${tabs.map(([k,l])=>`<button class="btn ${st===k?'ok':'ghost'}" onclick="window._imgState='${k}';loadMod()">${l}</button>`).join('')}</div></div>`;
+  if(!items.length)return $('#view').innerHTML=head+'<div class="muted">해당 이미지가 없어요.</div>';
+  $('#view').innerHTML=head+'<div class="stat" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr))">'+items.map(m=>`<div class="card" id="img_${m.id}">
+    <img src="${esc(m.image_url)}" style="width:100%;border-radius:10px;cursor:zoom-in" onclick="window.open(this.src)"/>
+    <div class="meta" style="margin-top:6px">${esc(m.sender?.nickname||m.sender_id)} · ${dt(m.created_at)} <span class="pill ${m.image_state==='rejected'?'p-rejected':m.image_state==='approved'?'p-verified':'p-pending'}">${m.image_state}</span></div>
+    <div class="btns"><button class="btn ok" onclick="imgDo(${m.id},'approved')">승인</button><button class="btn no" onclick="imgDo(${m.id},'rejected')">거부</button>
+      <button class="btn ghost" onclick="viewMatchChat('${m.match_id}')">대화</button></div></div>`).join('')+'</div>';
+}
+async function imgDo(id,state){try{await api('image_decide',{id,state});toast('처리됨');$('#img_'+id)?.remove();}catch(e){alert(e.message)}}
+async function viewMatchChat(mid){try{const d=await api('chat_by_match',{match_id:mid});const body=d.messages.length?d.messages.map(m=>`<div class="bubble ${m.sender_id===d.participants[1]?.id?'br':'bl'}">${m.image_url?`<img src="${esc(m.image_url)}"/>`:''}${esc(m.original_text||'')}${m.translated_text&&m.translated_text!==m.original_text?`<div class="tr">${esc(m.translated_text)}</div>`:''}<div class="tr">${dt(m.created_at)}</div></div>`).join(''):'<div class="muted">메시지 없음</div>';modal(`<h3>대화 ${esc(d.participants[0]?.nickname||'')} ↔ ${esc(d.participants[1]?.nickname||'')}</h3>${body}<div class="btns"><button class="btn ghost" onclick="closeModal()">닫기</button></div>`);}catch(e){alert(e.message)}}
+
+// ── 회원 ──
+async function loadMembers(){
+  $('#view').innerHTML=`<div class="card"><div class="flex">
+    <input class="grow" id="q" placeholder="닉네임 검색 후 Enter" onkeydown="if(event.key==='Enter')searchM()"/>
+    <select id="flt" style="width:auto" onchange="searchM()">
+      ${[['all','전체'],['pending','KYC대기'],['paid','플러스+'],['premium','프리미엄'],['banned','정지'],['deleted','탈퇴']].map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}
+    </select><button class="btn ok" onclick="searchM()">검색</button></div></div><div id="mlist" class="muted">검색하거나 필터를 선택하세요.</div>`;
+  searchM();
+}
+async function searchM(){
+  const q=$('#q')?.value.trim()||'',filter=$('#flt')?.value||'all';
+  $('#mlist').innerHTML='<div class="muted">불러오는 중…</div>';
+  try{const {items}=await api('members_search',{q,filter});
+    if(!items.length)return $('#mlist').innerHTML='<div class="muted">결과 없음</div>';
+    $('#mlist').innerHTML=items.map(p=>memberRow(p)).join('');
+  }catch(e){$('#mlist').innerHTML=`<div class="err">${esc(e.message)}</div>`}
+}
+function tierPill(p){return p.has_premium_option?'<span class="pill p-prem">프리미엄</span>':p.is_paid_member?'<span class="pill p-paid">플러스</span>':''}
+function kycPill(p){const k=p.kyc_status;return `<span class="pill ${k==='verified'?'p-verified':k==='rejected'?'p-rejected':'p-pending'}">${k}</span>`}
+function memberRow(p){return `<div class="card"><div class="row">${p.photo_url?`<img class="ava" src="${esc(p.photo_url)}"/>`:'<div class="ava"></div>'}
+  <div class="grow"><div class="name">${esc(p.nickname)} ${kycPill(p)}${tierPill(p)}${p.is_banned?'<span class="pill p-ban">정지</span>':''}${p.is_deleted?'<span class="pill p-del">탈퇴</span>':''}</div>
+  <div class="meta">${flag(p.country)} · ${p.gender||'-'} · ${age(p.birth_year)}세 · ${esc(p.region||'-')} · 💎${nf(p.points)}P</div></div>
+  <button class="btn ghost" onclick="openMember('${p.id}')">관리</button></div></div>`;}
+async function openMember(id){
+  try{const d=await api('member_get',{id});const p=d.profile;
+    const spend=Object.entries(d.spend||{}).map(([c,v])=>cur(v,c)).join(' · ')||'없음';
+    modal(`<h3>${esc(p.nickname)} ${kycPill(p)}${tierPill(p)}${p.is_banned?'<span class="pill p-ban">정지</span>':''}${p.is_deleted?'<span class="pill p-del">탈퇴</span>':''}</h3>
+      <div class="row" style="margin-bottom:8px">${p.photo_url?`<img class="ava" style="width:70px;height:70px" src="${esc(p.photo_url)}"/>`:''}
+        <div><div class="meta">${flag(p.country)} · ${p.gender==='M'?'남':p.gender==='F'?'여':'-'} · ${age(p.birth_year)}세 · ${esc(p.region||'-')}</div>
+        <div class="meta">${jobs[p.job]||'-'} ${p.height?'· '+p.height+'cm':''} ${p.mbti?'· '+esc(p.mbti):''} · 가입 ${dt(p.created_at)}</div>
+        <div class="meta">💎 ${nf(p.points)}P · 결제누적 ${spend}</div></div></div>
+      ${p.bio_original?`<div class="meta">“${esc(p.bio_original)}”</div>`:''}
+      ${d.tags?.length?`<div style="margin:8px 0">${d.tags.map(t=>`<span class="chip">${esc(t)}</span>`).join('')}</div>`:''}
+      <div class="stat" style="grid-template-columns:repeat(4,1fr);margin:8px 0"><div><b>${nf(d.stats.matches)}</b><span>매칭</span></div><div><b>${nf(d.stats.messages)}</b><span>메시지</span></div><div><b>${nf(d.stats.reportsTarget)}</b><span>피신고</span></div><div><b>${nf(d.stats.reportsBy)}</b><span>신고함</span></div></div>
+      <div class="meta" style="margin-top:6px">KYC</div><div class="btns" style="margin-top:4px">
+        <button class="btn ok" onclick="setKyc('${id}','verified')">승인</button><button class="btn no" onclick="setKyc('${id}','rejected')">반려</button><button class="btn grey" onclick="setKyc('${id}','pending')">대기</button></div>
+      <div class="meta" style="margin-top:10px">등급(수동)</div><div class="btns" style="margin-top:4px">
+        <button class="btn grey" onclick="setTier('${id}',false,false)">무료</button><button class="btn ${p.is_paid_member&&!p.has_premium_option?'ok':'ghost'}" onclick="setTier('${id}',true,false)">플러스</button><button class="btn ${p.has_premium_option?'ok':'ghost'}" onclick="setTier('${id}',true,true)">프리미엄</button></div>
+      <div class="meta" style="margin-top:10px">포인트 지급/차감</div><div class="flex" style="margin-top:4px"><input id="pt" style="width:110px" type="number" placeholder="예: 100"/><button class="btn ghost" onclick="grantPt('${id}')">적용</button></div>
+      <div class="btns" style="margin-top:14px;border-top:1px solid var(--line);padding-top:12px">
+        ${p.is_banned?`<button class="btn ok" onclick="banUser('${id}',false)">정지 해제</button>`:`<button class="btn danger" onclick="banUser('${id}',true)">정지</button>`}
+        ${(p.is_deleted||p.is_banned)?`<button class="btn grey" onclick="restoreUser('${id}')">복구(정지·탈퇴 해제)</button>`:''}
+        <button class="btn ghost" onclick="closeModal()">닫기</button></div>`);
+  }catch(e){alert(e.message)}
+}
+async function setKyc(id,status){try{await api('kyc_decide',{id,status});toast('KYC '+status);closeModal();route();}catch(e){alert(e.message)}}
+async function setTier(id,paid,premium){try{await api('member_set_tier',{id,paid,premium});toast('등급 변경됨');closeModal();route();}catch(e){alert(e.message)}}
+async function grantPt(id){const a=$('#pt').value;if(!a)return;try{const r=await api('member_grant_points',{id,amount:a});toast('포인트 → '+nf(r.points)+'P');closeModal();}catch(e){alert(e.message)}}
+async function banUser(id,val){if(val&&!confirm('이 회원을 정지할까요?'))return;try{await api('member_ban',{id,val});toast(val?'정지됨':'정지 해제');closeModal();route();}catch(e){alert(e.message)}}
+async function restoreUser(id){if(!confirm('정지·탈퇴를 해제(복구)할까요?'))return;try{await api('member_restore',{id});toast('복구됨');closeModal();route();}catch(e){alert(e.message)}}
+
+// ── 데이트글 ──
+async function loadDates(){
+  const {items}=await api('dates_list');
+  if(!items.length)return $('#view').innerHTML='<div class="muted">데이트 글이 없어요.</div>';
+  const catL={meal:'식사',cafe:'카페',sightseeing:'관광',drink:'술',activity:'액티비티',etc:'기타'};
+  $('#view').innerHTML=items.map(d=>`<div class="card"><div class="name">${esc(d.title)} <span class="pill ${d.status==='open'?'p-verified':'p-del'}">${d.status}</span></div>
+    <div class="meta">${catL[d.category]||d.category} · ${esc(d.city||'-')} · ${d.when_date||'-'} · 작성 ${esc(d.author?.nickname||'-')} · ${dt(d.created_at)}</div>
+    ${d.note?`<div class="meta" style="margin-top:6px">${esc(d.note)}</div>`:''}
+    <div class="btns"><button class="btn ghost" onclick="openMember('${d.author_id}')">작성자</button>${d.status==='open'?`<button class="btn danger" onclick="dateRemove('${d.id}')">내리기</button>`:''}</div></div>`).join('');
+}
+async function dateRemove(id){if(!confirm('이 글을 내릴까요?'))return;try{await api('date_remove',{id});toast('내려짐');loadDates();}catch(e){alert(e.message)}}
+
+// ── 운영자 + 감사 ──
 async function loadAdmins(){
-  const {data,error}=await sb.from('admins').select('uid,added_at').order('added_at');
-  if(error)return $('#view').innerHTML=`<div class="err">${esc(error.message)}</div>`;
-  const ids=data.map(a=>a.uid);
-  const {data:profs}=await sb.from('profiles').select('id,nickname').in('id',ids);
-  const map=Object.fromEntries((profs||[]).map(p=>[p.id,p.nickname]));
-  $('#view').innerHTML=`<div class="card"><input id="ae" type="email" placeholder="이메일로 운영자 추가 후 Enter" onkeydown="if(event.key==='Enter')addAdmin()"/><div class="err" id="aerr"></div></div>`
-    +data.map(a=>`<div class="card"><div class="row"><div><div class="name">${esc(map[a.uid]||'(프로필 없음)')}</div>
-      <div class="meta">${a.uid}</div></div>
-      <button class="btn no" style="margin-left:auto" onclick="rmAdmin('${a.uid}',this)">해제</button></div></div>`).join('');
+  const [a,au]=await Promise.all([api('admins_list'),api('audit_list')]);
+  $('#view').innerHTML=`<div class="card"><div class="flex"><input class="grow" id="ae" type="email" placeholder="이메일로 운영자 추가" onkeydown="if(event.key==='Enter')addAdmin()"/><button class="btn ok" onclick="addAdmin()">추가</button></div><div class="err" id="aerr"></div></div>`
+    +a.items.map(x=>`<div class="card"><div class="row"><div class="grow"><div class="name">${esc(x.nickname||x.email||'(이름없음)')}</div><div class="meta">${esc(x.email||'')} · ${x.uid.slice(0,8)}… · ${dt(x.added_at)}</div></div>${x.uid===a.me?'<span class="meta">나</span>':`<button class="btn no" onclick="rmAdmin('${x.uid}')">해제</button>`}</div></div>`).join('')
+    +`<div class="card"><b>최근 관리 활동 (감사 로그)</b><table style="margin-top:8px"><thead><tr><th>시각</th><th>운영자</th><th>액션</th><th>대상</th></tr></thead><tbody>${au.items.map(l=>`<tr><td>${dt(l.created_at)}</td><td>${esc(l.admin)}</td><td>${esc(l.props?.action||'')}</td><td class="meta">${esc(l.props?.target||l.props?.email||'')}</td></tr>`).join('')||'<tr><td colspan="4" class="muted">기록 없음</td></tr>'}</tbody></table></div>`;
 }
-async function addAdmin(){
-  const email=$('#ae').value.trim();$('#aerr').textContent='';
-  const {data,error}=await sb.rpc('add_admin_by_email',{p_email:email});
-  if(error)return $('#aerr').textContent='실패: '+error.message;
-  loadAdmins();
-}
-async function rmAdmin(uid,btn){if(uid===ME.id){alert('본인은 해제할 수 없어요.');return}if(!confirm('운영자에서 해제할까요?'))return;const {error}=await sb.from('admins').delete().eq('uid',uid);if(error){alert('실패: '+error.message);return}loadAdmins();}
+async function addAdmin(){const email=$('#ae').value.trim();$('#aerr').textContent='';if(!email)return;try{await api('admin_add',{email});toast('운영자 추가됨');loadAdmins();}catch(e){$('#aerr').textContent=e.message==='no_user'?'해당 이메일의 가입자가 없어요.':e.message}}
+async function rmAdmin(uid){if(!confirm('운영자에서 해제할까요?'))return;try{await api('admin_remove',{uid});toast('해제됨');loadAdmins();}catch(e){alert(e.message)}}
+
+// ── 모달 ──
+function modal(html){closeModal();const m=el(`<div class="modal" id="modal" onclick="if(event.target===this)closeModal()"><div class="sheet">${html}</div></div>`);document.body.appendChild(m);}
+function closeModal(){$('#modal')?.remove()}
 
 boot();
 </script>
